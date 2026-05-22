@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Wire — The Response | Grade 11 History</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Sans+3:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#1A1530;--card:#241E40;--border:#382E5C;--border2:#4A4070;
+  --dim:#8078B0;--mid:#A098D0;--light:#C8C0E8;--bright:#E0D8F8;--white:#F8F4FF;
+  --red:#E05050;--red-bg:rgba(224,80,80,.1);
+  --green:#40C878;--green-bg:rgba(64,200,120,.1);
+  --blue:#5090E0;--blue-bg:rgba(80,144,224,.1);
+  --amber:#E8B838;--amber-bg:rgba(232,184,56,.1);
+  --acc:#50E8D8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{min-height:100vh;background:var(--bg);color:var(--light);font-family:'Source Sans 3',sans-serif;line-height:1.7;overflow-x:hidden;}
+.c{max-width:640px;margin:0 auto;padding:1rem;}
+
+/* HUD */
+.hud{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(26,21,48,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:.5rem 1rem;}
+.hud-inner{max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
+.hud-rank{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);}
+.hud-xp-wrap{width:100px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-left:.6rem;}
+.hud-xp-bar{height:100%;background:var(--acc);border-radius:2px;transition:width .5s ease;}
+.hud-right{display:flex;align-items:center;gap:.8rem;}
+.hud-streak{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);}
+.hud-streak.hot{color:var(--amber);}.hud-streak.fire{color:var(--red);}
+.hud-xp{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--dim);}
+.xp-pop{position:fixed;top:40%;left:50%;transform:translate(-50%,0);font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:600;color:var(--green);pointer-events:none;z-index:200;animation:xpUp 1s ease-out forwards;}
+@keyframes xpUp{0%{opacity:1;transform:translate(-50%,0) scale(.8);}60%{opacity:1;transform:translate(-50%,-30px) scale(1.1);}100%{opacity:0;transform:translate(-50%,-50px) scale(.9);}}
+.lvl-up{position:fixed;inset:0;background:rgba(26,21,48,.95);display:flex;align-items:center;justify-content:center;z-index:300;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* Progress */
+.prog{display:flex;gap:.25rem;margin-bottom:1rem;padding-top:2rem;}
+.prog-dot{flex:1;height:3px;background:var(--border);border-radius:2px;}
+.prog-dot.done{background:var(--green);}.prog-dot.active{background:var(--acc);}.prog-dot.up{background:var(--border);}
+
+.sec-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--dim);margin-bottom:.6rem;}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);padding:1.3rem 1.4rem;margin-bottom:1rem;}
+.card p{font-size:1.15rem;line-height:1.8;color:var(--light);}.card p+p{margin-top:.7rem;}
+.card strong{color:var(--white);font-weight:600;}
+
+/* Decision scenario */
+.decision{background:var(--card);border:2px solid var(--acc);padding:1.4rem;margin:1rem 0;}
+.decision-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--acc);margin-bottom:.5rem;}
+.decision-scenario{font-family:'DM Serif Display',Georgia,serif;font-size:1.15rem;color:var(--white);line-height:1.6;margin-bottom:1rem;}
+.decision-opt{display:block;width:100%;text-align:left;background:var(--bg);border:1px solid var(--border);color:var(--light);padding:.9rem 1rem;margin-bottom:.5rem;font-size:1rem;line-height:1.5;cursor:pointer;transition:all .2s;}
+.decision-opt:hover:not(.lk){border-color:var(--acc);color:var(--white);background:rgba(64,216,208,.06);}
+.decision-opt.sel{border-color:var(--acc);background:rgba(64,216,208,.08);color:var(--white);}
+.decision-opt.lk{cursor:default;opacity:.8;}
+.decision-opt.actual{border-color:var(--acc);background:rgba(64,216,208,.1);color:var(--white);font-weight:600;}
+.decision-opt.actual::after{content:' ← WHAT ACTUALLY HAPPENED';font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:400;color:var(--acc);}
+.decision-reveal{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--acc);padding:.9rem 1rem;margin-top:.8rem;font-size:.95rem;line-height:1.7;color:var(--light);}
+.decision-reveal strong{color:var(--white);}
+
+/* Which policy rapid */
+.wp-desc{font-size:clamp(1.3rem,3.5vw,1.7rem);color:var(--white);line-height:1.5;text-align:center;padding:2rem 1rem;margin-bottom:1.5rem;font-family:'DM Serif Display',Georgia,serif;}
+.wp-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;}
+.wp-btn{padding:1.2rem .5rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;letter-spacing:.05em;border:1px solid var(--border);background:var(--card);color:var(--mid);cursor:pointer;transition:all .15s;text-align:center;}
+.wp-btn:active{transform:scale(.97);}
+.wp-btn:hover:not(.off){border-color:var(--acc);color:var(--acc);background:rgba(64,216,208,.06);}
+.wp-btn.correct{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.wp-btn.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red);}
+.wp-btn.off{pointer-events:none;opacity:.3;}
+.wp-fb{text-align:center;padding:.6rem;margin-top:.5rem;font-size:.9rem;color:var(--light);}
+.wp-fb strong{color:var(--white);}
+
+/* Fill the gap */
+.gap-sentence{font-size:1.1rem;line-height:1.9;color:var(--light);margin-bottom:1rem;}
+.gap-blank{display:inline-block;min-width:120px;border-bottom:2px solid var(--acc);padding:0 .3rem;color:var(--acc);font-weight:600;cursor:pointer;transition:all .2s;}
+.gap-blank.empty{color:var(--dim);font-style:italic;font-weight:400;}
+.gap-blank.correct{border-bottom-color:var(--green);color:var(--green);}
+.gap-blank.wrong{border-bottom-color:var(--red);color:var(--red);text-decoration:line-through;}
+.gap-options{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem;}
+.gap-opt{background:var(--card);border:1px solid var(--border);padding:.5rem 1rem;font-size:.95rem;color:var(--mid);cursor:pointer;transition:all .2s;}
+.gap-opt:hover:not(.used){border-color:var(--acc);color:var(--white);}
+.gap-opt.used{opacity:.4;cursor:default;text-decoration:line-through;}
+
+/* MCQ */
+.mcq-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;padding:.2rem .5rem;margin-bottom:.6rem;}
+.mcq-badge.apply{background:var(--amber-bg);color:var(--amber);}
+.mcq-badge.analyse{background:rgba(120,80,168,.08);color:#7850A8;}
+.mcq-badge.understand{background:var(--green-bg);color:var(--green);}
+.mcq-q{font-family:'DM Serif Display',Georgia,serif;font-size:1.15rem;color:var(--white);line-height:1.5;margin-bottom:.8rem;}
+.mcq-timer{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem;}
+.mcq-timer-bg{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.mcq-timer-bar{height:100%;border-radius:3px;transition:width .25s linear;}
+.mcq-timer-bar.ok{background:var(--green);}.mcq-timer-bar.warn{background:var(--amber);}.mcq-timer-bar.crit{background:var(--red);animation:tfl .4s ease infinite;}
+@keyframes tfl{50%{opacity:.4;}}
+.mcq-timer-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mid);min-width:2rem;text-align:right;}
+.mcq-opt{display:block;width:100%;text-align:left;background:var(--bg);border:1px solid var(--border);color:var(--light);padding:.9rem 1rem .9rem 2.4rem;margin-bottom:.4rem;font-size:1rem;line-height:1.5;cursor:pointer;transition:all .2s;position:relative;}
+.mcq-opt::before{content:attr(data-l);position:absolute;left:.8rem;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--dim);font-weight:600;}
+.mcq-opt:hover:not(.lk){border-color:var(--acc);color:var(--white);}
+.mcq-opt.sel{border-color:var(--acc);background:rgba(64,216,208,.08);color:var(--white);}
+.mcq-opt.cr{border-color:var(--green);background:var(--green-bg);color:var(--white);}
+.mcq-opt.cr::after{content:'✓';position:absolute;right:.8rem;top:50%;transform:translateY(-50%);color:var(--green);}
+.mcq-opt.wr{border-color:var(--red);background:var(--red-bg);color:var(--dim);text-decoration:line-through;}
+.mcq-opt.lk{cursor:default;}
+.mcq-fb{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--green);padding:.9rem 1rem;margin-top:.7rem;font-size:.92rem;line-height:1.7;color:var(--light);}
+.mcq-fb.wrong{border-left-color:var(--red);}
+.mcq-fb strong{color:var(--white);}
+.mcq-tip{margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);font-size:.82rem;color:var(--amber);font-style:italic;}
+.mcq-tip::before{content:'⚡ EXAM TIP: ';font-style:normal;font-weight:600;}
+
+/* Terms */
+.terms-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);margin-top:1rem;margin-bottom:.4rem;}
+.terms-wrap{display:flex;flex-wrap:wrap;gap:.4rem;}
+.term-tag{background:var(--card);border:1px solid var(--border);padding:.35rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--acc);cursor:pointer;transition:all .2s;}
+.term-tag:hover{border-color:var(--acc);background:rgba(64,216,208,.06);}
+.term-tag::after{content:' ⓘ';font-size:.6rem;opacity:.5;}
+.term-def{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--acc);padding:.8rem 1rem;margin-top:.5rem;font-size:.95rem;line-height:1.7;color:var(--light);display:none;}
+.term-def.vis{display:block;animation:tIn .3s ease;}
+.term-def strong{color:var(--white);}
+@keyframes tIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+
+/* Buttons */
+.btn-p{display:inline-block;background:var(--acc);color:#1A1530;border:none;padding:.7rem 1.5rem;font-family:'Source Sans 3',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;}
+.btn-p:hover{filter:brightness(1.1);transform:translateY(-1px);}.btn-p:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-s{display:inline-block;background:transparent;color:var(--dim);border:1px solid var(--border);padding:.6rem 1.2rem;font-family:'Source Sans 3',sans-serif;font-size:.85rem;cursor:pointer;transition:all .2s;}
+.btn-s:hover{color:var(--white);border-color:var(--mid);}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;}
+
+/* End */
+.end-scores{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:1rem 0;}
+.end-sc{background:var(--card);border:1px solid var(--border);padding:.8rem .4rem;text-align:center;}
+.end-sc-num{font-family:'DM Serif Display',Georgia,serif;font-size:1.8rem;color:var(--white);}
+.end-sc-label{font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:.2rem;}
+
+@media(max-width:500px){.c{padding:.7rem;}.wp-btns{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="hud-el"></div>
+<div class="c" id="app"></div>
+<script>
+var LVLS=[{name:'RECRUIT',xp:0},{name:'ANALYST',xp:40},{name:'AGENT',xp:100},{name:'OPERATIVE',xp:180},{name:'DIRECTOR',xp:280}];
+var params=new URLSearchParams(window.location.search);
+var xp=parseInt(params.get('xp'))||0,streak=parseInt(params.get('streak'))||0,bestStreak=Math.max(streak,parseInt(params.get('best'))||0),lvl=parseInt(params.get('lvl'))||0,lvlShown=lvl;
+var app=document.getElementById('app'),hudEl=document.getElementById('hud-el');
+
+var SEQ=[
+  {type:'intro'},
+  {type:'wp'}, // Which Policy recall
+  {type:'decision',label:'SCENARIO · GREECE, 1947',scenario:'Communist forces are fighting to overthrow the government in Greece. Britain has been funding the government side, but their economy is shattered after WWII — they can no longer afford it. Greece is about to fall. You are Truman\'s adviser. What do you recommend?',options:['Stay out of it — Greece is a European problem, not an American one','Offer to negotiate with the communists and find a compromise government','Commit American military and financial support to defend Greece — and announce that the USA will do the same for any democratic country threatened by communism','Send economic aid to rebuild Greece but avoid any military commitment'],actual:2,reveal:'Truman chose Option C. On 12 March 1947, he announced what became the <strong>Truman Doctrine</strong>: the USA would provide military and financial support to any democratic country under threat from communism. It wasn\'t just about Greece — it was a <strong>global commitment</strong> that defined American foreign policy for the next four decades.'},
+  {type:'content',label:'THE TRUMAN DOCTRINE · MARCH 1947',body:'<p>The Truman Doctrine emerged from a specific crisis — the <strong>Greek Civil War</strong> (1946–1949). When Britain could no longer afford to support the Greek government against communist insurgents, the USA stepped in.</p><p>But Truman went far beyond Greece. He declared that the USA would support <strong>any democratic country threatened by communism</strong> — anywhere in the world. This was the policy of <strong>containment</strong> in action: you can\'t roll back communism where it already exists, but you can stop it from spreading.</p><p>The Truman Doctrine transformed the USA from a country that had historically avoided European entanglements into the <strong>self-appointed global defender of the capitalist world</strong>.</p>',terms:[{t:'Truman Doctrine',d:'The 1947 policy committing the USA to provide military and financial support to any democratic country under threat from communism. The foundation of containment.'},{t:'containment',d:'The strategy of preventing communism from spreading further, without trying to eliminate it where it already existed. The Truman Doctrine and Marshall Plan were both instruments of containment.'}]},
+  {type:'decision',label:'SCENARIO · EUROPE, 1947',scenario:'Europe is devastated. Cities in ruins. Economies collapsed. Millions hungry. Communist parties are gaining popularity in France and Italy — people are desperate enough to vote for anyone who promises food and jobs. You have $13 billion. How do you use it?',options:['Give the money directly to European governments with no conditions — let them spend it however they choose','Offer economic aid to rebuild Western Europe, with conditions that recipient countries trade with the USA — and offer it to Eastern Europe too, knowing Stalin will probably block it','Use the money to build American military bases across Europe to defend against Soviet invasion','Invest the money in the American economy instead — Europe needs to solve its own problems'],actual:1,reveal:'This was the <strong>Marshall Plan</strong> (June 1947). Over $13 billion to rebuild European economies, with trade strings attached. The genius was offering it to the USSR and its satellites too — creating a <strong>no-win situation for Stalin</strong>. Accept, and Western influence floods Eastern Europe. Refuse, and the contrast between recovering West and struggling East makes communism look bad. <strong>Czechoslovakia wanted to accept. Stalin said no.</strong>'},
+  {type:'content',label:'THE MARSHALL PLAN · JUNE 1947',body:'<p>Secretary of State George Marshall announced the <strong>European Recovery Programme</strong>. The logic was strategic: <strong>poverty makes countries vulnerable to communism</strong>. Rebuild their economies, and people choose capitalism and democracy over revolution.</p><p>The aid came with strings — countries had to prioritise trade with the USA. This wasn\'t pure generosity; it was <strong>economic containment</strong>, pulling Western Europe into America\'s economic orbit.</p><p>Stalin\'s response was to form <strong>COMINFORM</strong>, an organisation coordinating European communist parties against Western influence. He also blocked all satellite states from accepting Marshall Plan aid — even Czechoslovakia, which had shown particular interest.</p>',terms:[{t:'Marshall Plan',d:'The European Recovery Programme (1947). Over $13 billion in economic aid to rebuild Europe. Designed to make capitalism attractive and prevent communist takeovers.'},{t:'COMINFORM',d:'The Communist Information Bureau, formed by Stalin in 1947 to coordinate European communist parties and counter Western influence from the Truman Doctrine and Marshall Plan.'}]},
+  {type:'mcq',badge:'apply',time:25,question:'The Marshall Plan offered aid to the USSR and its satellites. Why was this strategically significant?',options:['It showed the USA was genuinely generous and wanted to rebuild all of Europe equally, regardless of political system','It put Stalin in a position where accepting meant allowing Western economic influence into Eastern Europe, while refusing made the communist bloc look like it was keeping its own people in poverty','It was designed primarily to gain access to Eastern European raw materials and cheap labour for American industry','It was a diplomatic gesture with no real strategic purpose — the USA knew the USSR would refuse'],correct:1,feedback:'Option A takes the plan at face value — but $13 billion always comes with strategic strings. Option C identifies a real outcome but not the primary logic. Option D underestimates American strategic thinking. <strong>The double bind was the point</strong>: either outcome served American interests.',tip:'Link Truman Doctrine + Marshall Plan as two sides of containment: the stick (military support) and the carrot (economic prosperity).'},
+  {type:'mcq',badge:'analyse',time:25,question:'Czechoslovakia wanted to accept Marshall Plan aid. Stalin prevented it. What does this reveal about the nature of the Soviet bloc?',options:['That Czechoslovakia had already decided to leave the communist bloc and become a Western ally','That satellite states did not have genuine sovereignty — their major decisions were ultimately controlled by Moscow, even when they wanted to act independently','That the Marshall Plan was genuinely harmful to Eastern European economies and Stalin was protecting his allies from exploitation','That Stalin and Czechoslovakia had a private agreement that the aid would be accepted later once conditions improved'],correct:1,feedback:'Option A overstates Czech intentions — wanting American money is not the same as rejecting communism. Option C takes Soviet justification at face value. Option D is invented. <strong>A supposedly sovereign country overruled by Moscow reveals the true nature of the "buffer zone"</strong> — control, not just security.',tip:'"Czechoslovakia wanted to accept but Stalin prevented it" — this single fact is more powerful than pages of general analysis. Specific evidence wins marks.'},
+  {type:'content',label:'MILITARY ALLIANCES · THE WORLD DIVIDES',body:'<p>In <strong>1949</strong>, the Western allies formed <strong>NATO</strong> — the North Atlantic Treaty Organisation. It was a collective defence pact: an attack on one member would be treated as an attack on all. NATO was triggered directly by the Berlin Blockade (which you\'ll explore in the Berlin module).</p><p>In <strong>1955</strong>, the USSR responded with the <strong>Warsaw Pact</strong> — a military alliance of communist states. With both alliances in place, <strong>the world was now divided into two nuclear-armed military blocs</strong>.</p><p>Any conflict, anywhere, now risked pulling both alliances — and their nuclear arsenals — into a global war.</p>',terms:[{t:'NATO',d:'North Atlantic Treaty Organisation (1949). A Western defensive military alliance — an attack on one member is treated as an attack on all. Still exists today.'},{t:'Warsaw Pact',d:'The Soviet military alliance (1955), formed in response to NATO. Included the USSR and its satellite states. Dissolved when the Soviet Union collapsed in 1991.'},{t:'collective security',d:'The principle that an attack on one member of an alliance is treated as an attack on all. It deters aggression — but also means any local conflict can escalate globally.'}]},
+  {type:'gap'}, // Fill the gap
+  {type:'mcq',badge:'understand',time:20,question:'Why did NATO and the Warsaw Pact make the Cold War MORE dangerous rather than safer?',options:['They forced smaller European countries to increase military spending dramatically, weakening their economies and creating widespread instability','They created a structure where any local conflict could trigger a response from entire nuclear-armed alliances — meaning a crisis in one country could escalate into global war','They completely ended all diplomatic communication between East and West, making peaceful resolution of disputes impossible','They were primarily propaganda organisations with limited actual military capability, but their rhetoric increased public fear'],correct:1,feedback:'Option A describes a real effect but not the core danger. Option C overstates the communication breakdown — diplomatic channels existed. Option D drastically underestimates them — these were real alliances with real nuclear arsenals. <strong>The fundamental danger was the escalation mechanism</strong>: collective security meant any spark could become a nuclear fire.',tip:'Don\'t just list NATO and Warsaw Pact members. Explain the <em>significance</em>: they formalised the division and created a permanent risk of escalation.'},
+  {type:'end'}
+];
+
+var pos=0,answers={},wpIdx=0,wpDone=false,wpAnswers=[],gapDone=false,gapSelections={},timer=null;
+var totalScreens=SEQ.length;
+
+// WP data
+var WP_ITEMS=[
+  {desc:'Military and financial support to any democratic country threatened by communism',answer:'Truman Doctrine'},
+  {desc:'$13 billion in economic aid to rebuild European economies after WWII',answer:'Marshall Plan'},
+  {desc:'A Western defensive military alliance — attack on one is an attack on all',answer:'NATO'}
+];
+
+// Gap data
+var GAP_SENTENCES=[
+  {before:'The Truman Doctrine stated that the USA would provide ',blank:'military and financial support',after:' to any democratic country under threat from communism.'},
+  {before:'The Marshall Plan was based on the belief that ',blank:'poverty',after:' made countries vulnerable to communism.'},
+  {before:'NATO was based on the principle of ',blank:'collective security',after:' — an attack on one member is an attack on all.'}
+];
+var GAP_OPTIONS=['collective security','military and financial support','reparations','poverty','free elections','propaganda'];
+
+function render(){
+  clearInterval(timer);window.scrollTo({top:0,behavior:'auto'});
+  var d=SEQ[pos];if(!d){pos=SEQ.length-1;d=SEQ[pos];}
+  var rMap={intro:rIntro,wp:rWP,decision:rDecision,content:rContent,mcq:rMCQ,gap:rGap,end:rEnd};
+  (rMap[d.type]||function(){})();renderHUD();
+}
+
+function renderHUD(){var lv=LVLS[lvl],nxt=LVLS[lvl+1];var pct=nxt?Math.min(100,((xp-lv.xp)/(nxt.xp-lv.xp))*100):100;var sk=streak,skCl=sk>=5?'fire':sk>=3?'hot':'';var skTxt=sk>=3?'🔥'.repeat(Math.min(sk,5))+' '+sk:sk>0?'🔥 '+sk:'';hudEl.innerHTML='<div class="hud"><div class="hud-inner"><div style="display:flex;align-items:center;"><span class="hud-rank">'+lv.name+'</span><div class="hud-xp-wrap"><div class="hud-xp-bar" style="width:'+pct+'%"></div></div></div><div class="hud-right">'+(skTxt?'<span class="hud-streak '+skCl+'">'+skTxt+'</span>':'')+' <span class="hud-xp">'+xp+' XP</span></div></div></div>';}
+function addXP(n){xp+=n;var nl=0;for(var i=LVLS.length-1;i>=0;i--){if(xp>=LVLS[i].xp){nl=i;break;}}if(nl>lvl)lvl=nl;var el=document.createElement('div');el.className='xp-pop';el.textContent='+'+n+' XP';document.body.appendChild(el);setTimeout(function(){el.remove();},1100);if(lvl>lvlShown){lvlShown=lvl;var lv=LVLS[lvl];var o=document.createElement('div');o.className='lvl-up';o.innerHTML='<div style="text-align:center;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:.6rem;letter-spacing:.3em;color:var(--dim);">CLEARANCE UPGRADED</div><div style="font-family:\'DM Serif Display\',Georgia,serif;font-size:2.5rem;color:var(--acc);margin:.3rem 0;">'+lv.name+'</div><button class="btn-p" onclick="this.closest(\'.lvl-up\').remove()">Continue</button></div>';document.body.appendChild(o);}renderHUD();}
+function dots(){var h='<div class="prog">';for(var i=0;i<totalScreens-1;i++){h+='<div class="prog-dot '+(i<pos?'done':i===pos?'active':'up')+'"></div>';}return h+'</div>';}
+function nav(can){var h='<div class="nav-row">';h+=pos>0?'<button class="btn-s" onclick="pos--;render();">← Back</button>':'<span></span>';h+='<button class="btn-p" onclick="pos++;render();" '+(can?'':'disabled')+'>Continue →</button>';return h+'</div>';}
+function toggleTerm(id){var el=document.getElementById(id);if(!el)return;var p=el.parentNode;if(p){p.querySelectorAll('.term-def.vis').forEach(function(e){if(e!==el)e.classList.remove('vis');});}el.classList.toggle('vis');}
+function renderTerms(terms,prefix){var h='<div class="terms-label">👇 Tap any term for its definition</div><div class="terms-wrap">';terms.forEach(function(t,i){h+='<span class="term-tag" onclick="toggleTerm(\''+prefix+'_'+i+'\')">'+t.t+'</span>';});h+='</div>';terms.forEach(function(t,i){h+='<div class="term-def" id="'+prefix+'_'+i+'"><strong>'+t.t+':</strong> '+t.d+'</div>';});return h;}
+
+// === INTRO ===
+function rIntro(){
+  app.innerHTML='<div style="min-height:85vh;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:2rem 0;">'+
+    '<div style="font-family:\'JetBrains Mono\',monospace;font-size:.7rem;letter-spacing:.4em;text-transform:uppercase;color:var(--acc);margin-bottom:1.5rem;">THE WIRE · PART 4 OF 5</div>'+
+    '<div style="font-family:\'DM Serif Display\',Georgia,serif;font-size:clamp(2.8rem,8vw,4rem);color:var(--white);line-height:1.1;margin-bottom:1.2rem;">The Response</div>'+
+    '<div style="font-size:1.15rem;color:var(--mid);max-width:480px;margin:0 auto;line-height:1.8;">The USSR is swallowing Eastern Europe. The West needs a strategy. Not to attack — that means nuclear war. Not to retreat — that means surrender. Something in between. Something new.</div>'+
+    '<div style="margin-top:2.5rem;"><button class="btn-p" onclick="pos++;render();" style="padding:1rem 3rem;font-size:1.1rem;">Enter the briefing →</button></div>'+
+    '<div style="margin-top:1rem;font-family:\'JetBrains Mono\',monospace;font-size:.7rem;color:var(--dim);">First: can you tell the policies apart?</div></div>';
+}
+
+// === WHICH POLICY ===
+function rWP(){
+  if(wpIdx>=WP_ITEMS.length){wpDone=true;}
+  if(wpDone){
+    var c=wpAnswers.filter(function(a){return a.ok;}).length;
+    var h=dots()+'<div class="card"><div class="sec-label">RECALL COMPLETE</div><p style="font-size:1.1rem;"><strong>'+c+'/'+WP_ITEMS.length+'</strong> correct. '+(c>=2?'You can tell them apart. Now let\'s see how they were created.':'The differences matter for the exam. Pay close attention.')+'</p></div>';
+    h+='<div class="card"><div class="sec-label">QUICK RECAP</div><p style="font-size:1rem;margin-bottom:.5rem;"><strong>Truman Doctrine</strong> — Military and financial support to countries threatened by communism. The stick.</p><p style="font-size:1rem;margin-bottom:.5rem;"><strong>Marshall Plan</strong> — $13 billion in economic aid to rebuild Europe. The carrot.</p><p style="font-size:1rem;"><strong>NATO</strong> — A Western military alliance. Attack one, you attack all.</p></div>';
+    h+=nav(true);
+    app.innerHTML=h;return;
+  }
+  var q=WP_ITEMS[wpIdx],a=wpAnswers[wpIdx];
+  var h=dots()+'<div style="padding-top:.5rem;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);text-align:center;margin-bottom:.3rem;">WHICH POLICY? · '+(wpIdx+1)+'/'+WP_ITEMS.length+'</div>';
+  h+='<div class="wp-desc">'+q.desc+'</div>';
+  var policies=['Truman Doctrine','Marshall Plan','NATO'];
+  if(!a){
+    h+='<div class="wp-btns">';policies.forEach(function(p){h+='<button class="wp-btn" onclick="wpAnswer(\''+p+'\')">'+p+'</button>';});h+='</div>';
+  } else {
+    h+='<div class="wp-btns">';policies.forEach(function(p){
+      var cl='wp-btn';if(p===q.answer)cl+=' correct';else if(p===a.pick&&!a.ok)cl+=' wrong';else cl+=' off';
+      h+='<button class="'+cl+'" style="pointer-events:none;">'+p+'</button>';
+    });h+='</div>';
+    h+='<div class="wp-fb">'+(a.ok?'✓ Correct':'✗ That was <strong>'+q.answer+'</strong>')+'</div>';
+    h+='<div style="text-align:center;margin-top:.6rem;"><button class="btn-p" onclick="wpIdx++;render();" style="padding:.6rem 1.5rem;">Next →</button></div>';
+  }
+  h+='</div>';app.innerHTML=h;
+}
+function wpAnswer(pick){var q=WP_ITEMS[wpIdx],ok=pick===q.answer;wpAnswers[wpIdx]={pick:pick,ok:ok};if(ok){streak++;if(streak>bestStreak)bestStreak=streak;addXP(5);}else{streak=0;}render();}
+
+// === DECISION ===
+function rDecision(){
+  var d=SEQ[pos],a=answers[pos];
+  var h=dots()+'<div class="decision"><div class="decision-label">'+d.label+'</div><div class="decision-scenario">'+d.scenario+'</div>';
+  if(!a){
+    d.options.forEach(function(o,i){var sel=answers['tmp_'+pos]===i?' sel':'';h+='<button class="decision-opt'+sel+'" onclick="decSel('+i+')">'+o+'</button>';});
+    h+='<div style="margin-top:.6rem;"><button class="btn-p" onclick="decSub()" '+(answers['tmp_'+pos]===undefined?'disabled':'')+'>See what happened →</button></div>';
+  } else {
+    d.options.forEach(function(o,i){var cl='decision-opt lk';if(i===d.actual)cl+=' actual';h+='<button class="'+cl+'">'+o+'</button>';});
+    h+='<div class="decision-reveal">'+d.reveal+'</div>';
+  }
+  h+='</div>'+nav(!!a);app.innerHTML=h;
+}
+function decSel(i){answers['tmp_'+pos]=i;render();}
+function decSub(){var sel=answers['tmp_'+pos];if(sel===undefined)return;var d=SEQ[pos];answers[pos]={sel:sel,actual:d.actual};delete answers['tmp_'+pos];addXP(10);render();}
+
+// === CONTENT ===
+function rContent(){var d=SEQ[pos];var h=dots()+'<div class="sec-label">'+d.label+'</div><div class="card">'+d.body+'</div>';if(d.terms)h+=renderTerms(d.terms,'t'+pos);h+=nav(true);app.innerHTML=h;}
+
+// === MCQ ===
+function rMCQ(){
+  var d=SEQ[pos],a=answers[pos];
+  var h=dots()+'<div class="card"><div class="mcq-badge '+d.badge+'">'+d.badge.toUpperCase()+(d.time?' · '+d.time+'S':'')+'</div>';
+  if(d.time&&!a)h+='<div class="mcq-timer"><div class="mcq-timer-bg"><div class="mcq-timer-bar ok" id="mBar" style="width:100%"></div></div><span class="mcq-timer-num" id="mNum">'+d.time+'s</span></div>';
+  h+='<div class="mcq-q">'+d.question+'</div>';var LL=['A','B','C','D'];
+  if(!a){d.options.forEach(function(o,i){var sel=answers['tmp_'+pos]===i?' sel':'';h+='<button class="mcq-opt'+sel+'" data-l="'+LL[i]+'" onclick="mcqSel('+i+')">'+o+'</button>';});h+='<div style="margin-top:.6rem;"><button class="btn-p" onclick="mcqSub()" '+(answers['tmp_'+pos]===undefined?'disabled':'')+'>Submit</button></div>';}
+  else{d.options.forEach(function(o,i){var cl='mcq-opt lk';if(i===d.correct)cl+=' cr';else if(a.sel===i&&!a.ok)cl+=' wr';h+='<button class="'+cl+'" data-l="'+LL[i]+'">'+o+'</button>';});h+='<div class="mcq-fb'+(a.ok?'':' wrong')+'">'+(a.timedOut?'⏱ TIME\'S UP. ':'')+d.feedback+'</div>';if(d.tip)h+='<div class="mcq-tip">'+d.tip+'</div>';}
+  h+='</div>'+nav(!!a);app.innerHTML=h;
+  if(d.time&&!a){var tl=d.time;timer=setInterval(function(){tl--;var b=document.getElementById('mBar'),n=document.getElementById('mNum');if(b&&n){var p=(tl/d.time)*100;b.style.width=p+'%';b.className='mcq-timer-bar'+(p<25?' crit':p<50?' warn':' ok');n.textContent=tl+'s';}if(tl<=0){clearInterval(timer);answers[pos]={sel:-1,ok:false,timedOut:true};streak=0;render();}},1000);}
+}
+function mcqSel(i){answers['tmp_'+pos]=i;render();}
+function mcqSub(){var sel=answers['tmp_'+pos];if(sel===undefined)return;clearInterval(timer);var d=SEQ[pos],ok=sel===d.correct;answers[pos]={sel:sel,ok:ok,timedOut:false};delete answers['tmp_'+pos];if(ok){streak++;if(streak>bestStreak)bestStreak=streak;addXP(d.badge==='analyse'?20:15);}else{streak=0;}render();}
+
+// === GAP FILL ===
+function rGap(){
+  var h=dots()+'<div class="card"><div class="sec-label">FILL THE GAP</div>';
+  h+='<div style="font-size:.95rem;color:var(--mid);margin-bottom:1rem;">Select the correct word for each blank.</div>';
+  GAP_SENTENCES.forEach(function(g,i){
+    var sel=gapSelections[i];
+    var cls='gap-blank'+(sel?'':(gapDone?' wrong':' empty'));
+    if(gapDone&&sel===g.blank)cls='gap-blank correct';
+    if(gapDone&&sel&&sel!==g.blank)cls='gap-blank wrong';
+    h+='<div class="gap-sentence">'+g.before+'<span class="'+cls+'" onclick="'+(gapDone?'':'showGapOpts('+i+')')+'">'+(sel||'tap to select')+'</span>'+g.after+'</div>';
+  });
+  if(!gapDone){
+    h+='<div class="gap-options" id="gapOpts">';
+    GAP_OPTIONS.forEach(function(opt){
+      var used=Object.values(gapSelections).indexOf(opt)!==-1;
+      h+='<button class="gap-opt'+(used?' used':'')+'" onclick="'+(used?'':'pickGap(\''+opt+'\')')+'">'+opt+'</button>';
+    });
+    h+='</div>';
+    var allFilled=GAP_SENTENCES.every(function(_,i){return gapSelections[i];});
+    h+='<div style="margin-top:.8rem;"><button class="btn-p" onclick="gapSubmit()" '+(allFilled?'':'disabled')+'>Check answers</button></div>';
+  } else {
+    var c=0;GAP_SENTENCES.forEach(function(g,i){if(gapSelections[i]===g.blank)c++;});
+    h+='<div style="margin-top:.8rem;font-size:.95rem;">'+c+'/'+GAP_SENTENCES.length+' correct.</div>';
+  }
+  h+='</div>'+nav(gapDone);app.innerHTML=h;
+}
+var activeGap=null;
+function showGapOpts(i){activeGap=i;}
+function pickGap(opt){if(activeGap===null){/* find first empty */for(var i=0;i<GAP_SENTENCES.length;i++){if(!gapSelections[i]){activeGap=i;break;}}}if(activeGap===null)return;gapSelections[activeGap]=opt;activeGap=null;render();}
+function gapSubmit(){gapDone=true;var c=0;GAP_SENTENCES.forEach(function(g,i){if(gapSelections[i]===g.blank)c++;});addXP(c*5);if(c===GAP_SENTENCES.length){streak++;if(streak>bestStreak)bestStreak=streak;}else{streak=0;}render();}
+
+// === END ===
+function rEnd(){
+  var correct=0,total=0;SEQ.forEach(function(d,i){if(d.type==='mcq'&&answers[i]){total++;if(answers[i].ok)correct++;}});
+  var pct=total>0?Math.round(correct/total*100):0;var lv=LVLS[lvl];
+  var h='<div style="text-align:center;padding-top:2rem;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;">Part 4 Complete</div><div style="font-family:\'DM Serif Display\',Georgia,serif;font-size:2rem;color:var(--white);margin:.3rem 0;">'+lv.name+'</div><div style="font-size:.8rem;color:var(--mid);">'+xp+' XP · Best streak: '+bestStreak+'🔥</div></div>';
+  h+='<div class="end-scores"><div class="end-sc"><div class="end-sc-num">'+correct+'<span style="font-size:1rem;color:var(--dim);">/'+total+'</span></div><div class="end-sc-label">Correct</div></div><div class="end-sc"><div class="end-sc-num">'+pct+'<span style="font-size:1rem;color:var(--dim);">%</span></div><div class="end-sc-label">Accuracy</div></div><div class="end-sc"><div class="end-sc-num" style="font-size:1.2rem;">'+(pct>=75?'Strong':pct>=50?'Building':'Developing')+'</div><div class="end-sc-label">Level</div></div></div>';
+  h+='<div style="text-align:left;"><div class="sec-label">WHAT YOU NEED TO KNOW</div>';
+  h+='<div class="card"><p style="font-size:.95rem;"><strong>Truman Doctrine (1947):</strong> Military and financial support to any democratic country under communist threat. Triggered by the Greek Civil War. The foundation of containment.</p></div>';
+  h+='<div class="card"><p style="font-size:.95rem;"><strong>Marshall Plan (1947):</strong> $13 billion to rebuild Europe. Economic containment — poverty breeds communism. Offered to the USSR (who refused). Czechoslovakia wanted it; Stalin blocked them.</p></div>';
+  h+='<div class="card"><p style="font-size:.95rem;"><strong>NATO (1949) and Warsaw Pact (1955):</strong> Two nuclear-armed military blocs. Collective security made every local conflict a potential global war.</p></div></div>';
+  h+='<div style="text-align:center;margin-top:1rem;">';
+  if(pct>=60){h+='<button class="btn-p" onclick="showTeaser()" style="padding:.9rem 2.5rem;">Finish Part 4 →</button><br><button class="btn-s" onclick="restart()" style="margin-top:.8rem;">Try again for a better score</button>';}
+  else{h+='<div class="card" style="text-align:center;border-color:var(--red);margin-bottom:1rem;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:.65rem;color:var(--red);margin-bottom:.3rem;">CLEARANCE DENIED</div><div style="font-size:.95rem;">You need 60% to proceed. Review the policies and try again.</div></div><button class="btn-p" onclick="restart()">Retry Part 4 →</button>';}
+  h+='</div>';app.innerHTML=h;
+}
+
+function showTeaser(){
+  var o=document.createElement('div');
+  o.style.cssText='position:fixed;inset:0;background:rgba(20,16,38,.97);z-index:300;display:flex;align-items:center;justify-content:center;animation:fadeIn .4s ease;overflow-y:auto;';
+  o.innerHTML='<div style="max-width:500px;padding:2rem;text-align:center;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:1rem;">COMING UP IN PART 5</div><div style="font-family:\'DM Serif Display\',Georgia,serif;font-size:clamp(1.5rem,5vw,2.2rem);color:var(--white);line-height:1.3;font-style:italic;margin-bottom:1rem;">The alliance is dead. The world is divided.<br>But whose fault is it?</div><div style="font-size:.95rem;color:var(--light);line-height:1.7;margin-bottom:1.5rem;">In Part 5, you become the judge. Three generations of historians disagree on who started the Cold War. You\'ll hear all three arguments — and deliver your own verdict.</div><button class="btn-s" onclick="this.closest(\'div[style]\').remove();restart();">Retry Part 4</button></div>';
+  document.body.appendChild(o);
+}
+
+function restart(){xp=parseInt(params.get('xp'))||0;streak=0;bestStreak=0;lvl=parseInt(params.get('lvl'))||0;lvlShown=lvl;pos=0;answers={};wpIdx=0;wpDone=false;wpAnswers=[];gapDone=false;gapSelections={};activeGap=null;render();}
+
+render();
+</script>
+</body>
+</html>
